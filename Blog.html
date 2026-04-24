@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog — Patrick Santos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ====================================================================
+           BLOG-PAGE ONLY STYLES
+           ==================================================================== */
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 1, 1, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            clip-path: polygon(0% 0%, 97% 0%, 100% 4%, 100% 100%, 3% 100%, 0% 96%);
+            padding: 40px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.open .modal {
+            transform: translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted2);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: 16px;
+            cursor: none;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .modal h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 1px;
+            margin-bottom: 32px;
+        }
+
+        /* Form fields */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 13px;
+            padding: 14px 16px;
+            transition: border-color 0.3s;
+            outline: none;
+            resize: vertical;
+            clip-path: none;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .form-textarea { min-height: 160px; line-height: 1.7; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-submit {
+            width: 100%;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 16px;
+            font-family: var(--mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+            margin-top: 8px;
+        }
+
+        .form-submit:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        /* New post button */
+        .blog-new-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 14px 28px;
+            font-family: var(--mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: none;
+            font-weight: 700;
+            transition: all 0.3s;
+            clip-path: polygon(8% 0%, 100% 0%, 100% 75%, 92% 100%, 0% 100%, 0% 25%);
+        }
+
+        .blog-new-btn:hover {
+            box-shadow: 0 0 20px var(--accent);
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        /* Blog hero header */
+        .blog-hero {
+            padding: 140px 80px 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 32px;
+        }
+
+        .blog-hero-text {}
+
+        .blog-hero-tag {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--accent);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .blog-hero-tag::before {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .blog-title {
+            font-size: clamp(40px, 6vw, 80px);
+            font-weight: 800;
+            color: var(--white);
+            line-height: 0.95;
+            margin-bottom: 16px;
+            letter-spacing: -2px;
+        }
+
+        .blog-title span {
+            background: linear-gradient(135deg, var(--accent), #ff5555, var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .blog-subtitle {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            line-height: 1.8;
+            max-width: 400px;
+        }
+
+        /* Posts count */
+        .blog-count {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            border: 1px solid var(--border);
+            text-transform: uppercase;
+        }
+
+        /* Blog grid */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            padding: 0 80px 120px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Post article view */
+        .post-view {
+            display: none;
+            padding: 140px 80px 120px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .post-view.visible { display: block; }
+        .blog-list-view { display: block; }
+        .blog-list-view.hidden { display: none; }
+
+        /* Delete button on cards */
+        .blog-card-delete {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 10px;
+            padding: 4px 10px;
+            cursor: none;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .blog-card-delete:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Divider between hero and grid */
+        .blog-divider {
+            max-width: 1400px;
+            margin: 0 auto 48px;
+            padding: 0 80px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .blog-divider-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .blog-divider-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .blog-hero { padding: 120px 28px 48px; flex-direction: column; align-items: flex-start; }
+            .blog-grid { padding: 0 28px 80px; }
+            .blog-divider { padding: 0 28px; }
+            .post-view { padding: 120px 28px 80px; }
+            .form-row { grid-template-columns: 1fr; }
+            .modal { padding: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+    <div class="noise-overlay"></div>
+
+    <!-- Back to Top -->
+    <button id="backToTop" class="btn-top" onclick="scrollToTop()"><span>UP_</span></button>
+
+    <!-- Navigation -->
+    <nav id="nav">
+        <a href="index.html" class="nav-logo">// patrick.santos</a>
+        <ul class="nav-links">
+            <li><a href="index.html#skills">Skills</a></li>
+            <li><a href="index.html#projects">Projetos</a></li>
+            <li><a href="index.html#experience">Experiência</a></li>
+            <li><a href="blog.html" class="nav-blog">Blog <span class="nav-blog-dot"></span></a></li>
+        </ul>
+        <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="index.html" class="mobile-link">// Home</a>
+        <a href="index.html#skills" class="mobile-link">// Skills</a>
+        <a href="index.html#projects" class="mobile-link">// Projetos</a>
+        <a href="blog.html" class="mobile-link">// Blog</a>
+    </div>
+
+    <!-- NEW POST MODAL -->
+    <div class="modal-overlay" id="blogFormModal">
+        <div class="modal">
+            <button class="modal-close" id="modalClose" aria-label="Fechar">✕</button>
+            <h2>Novo Post</h2>
+            <p class="modal-subtitle">// escreva sua opinião ou artigo</p>
+
+            <form id="newPostForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="postTitle">Título *</label>
+                        <input class="form-input" id="postTitle" type="text" placeholder="Título do post" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="postTag">Categoria</label>
+                        <select class="form-select" id="postTag">
+                            <option value="Opinião">Opinião</option>
+                            <option value="Back-End">Back-End</option>
+                            <option value="Java">Java</option>
+                            <option value="Python">Python</option>
+                            <option value="Carreira">Carreira</option>
+                            <option value="Tecnologia">Tecnologia</option>
+                            <option value="Tutorial">Tutorial</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="postExcerpt">Resumo (opcional)</label>
+                    <input class="form-input" id="postExcerpt" type="text" placeholder="Uma frase resumindo o post...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="postBody">Conteúdo *</label>
+                    <textarea class="form-textarea" id="postBody" placeholder="Escreva aqui seu post, opinião, artigo..." required style="min-height: 220px;"></textarea>
+                </div>
+
+                <button type="submit" class="form-submit">Publicar Post →</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BLOG LIST VIEW -->
+    <div class="blog-list-view" id="blogListView">
+        <div class="blog-hero">
+            <div class="blog-hero-text">
+                <div class="blog-hero-tag">Patrick Santos</div>
+                <h1 class="blog-title">Blog &<br><span>Opiniões</span></h1>
+                <p class="blog-subtitle">
+                    // Artigos, pensamentos e opiniões sobre<br>
+                    desenvolvimento, tecnologia e carreira.
+                </p>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:16px;">
+                <span class="blog-count" id="postCount">0 POSTS</span>
+                <button class="blog-new-btn" id="openNewPost">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Novo Post
+                </button>
+            </div>
+        </div>
+
+        <div class="blog-divider">
+            <div class="blog-divider-line"></div>
+            <span class="blog-divider-label">Posts Recentes</span>
+            <div class="blog-divider-line"></div>
+        </div>
+
+        <div class="blog-grid" id="blogGrid">
+            <!-- Posts rendered by JS -->
+        </div>
+    </div>
+
+    <!-- POST DETAIL VIEW -->
+    <div class="post-view" id="postView">
+        <a href="#" class="blog-back" id="backToList">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            Voltar ao Blog
+        </a>
+
+        <div class="blog-post-header">
+            <div class="blog-post-tag" id="postDetailTag"></div>
+            <h1 class="blog-post-title" id="postDetailTitle"></h1>
+            <div class="blog-post-meta" id="postDetailMeta"></div>
+        </div>
+
+        <div class="blog-post-body" id="postDetailBody"></div>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-logo">// patrick.santos</div>
+            <div class="footer-links">
+                <a href="https://github.com/Santos-jv" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/patrick-santos-dev-ofc72871" target="_blank">LinkedIn</a>
+                <a href="index.html">Portfolio</a>
+            </div>
+            <p class="footer-copy">© 2026 — Patrick Santos // Niterói, RJ</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        /* ====================================================================
+           BLOG PAGE CONTROLLER
+           ==================================================================== */
+        const BLOG_KEY = 'patrick_blog_posts';
+
+        function getBlogPosts() {
+            try { return JSON.parse(localStorage.getItem(BLOG_KEY)) || []; }
+            catch { return []; }
+        }
+
+        function saveBlogPosts(posts) {
+            localStorage.setItem(BLOG_KEY, JSON.stringify(posts));
+        }
+
+        /* ---- Render post cards ---- */
+        function renderBlogPosts() {
+            const grid  = document.getElementById('blogGrid');
+            const count = document.getElementById('postCount');
+            const posts = getBlogPosts();
+
+            if (count) count.textContent = posts.length + (posts.length === 1 ? ' POST' : ' POSTS');
+
+            if (!grid) return;
+
+            if (posts.length === 0) {
+                grid.innerHTML = `
+                    <div class="blog-empty reveal-item">
+                        <h3>Nenhum post ainda.</h3>
+                        <p>// clique em "Novo Post" para começar a escrever</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = posts.map((post, i) => `
+                <div class="blog-card reveal-item" data-id="${post.id}" style="cursor:pointer;">
+                    <div class="blog-card-meta">
+                        <span class="blog-tag">${escHtml(post.tag)}</span>
+                        <span class="blog-date">${escHtml(post.date)}</span>
+                    </div>
+                    <h2 class="blog-card-title">${escHtml(post.title)}</h2>
+                    <p class="blog-card-excerpt">${escHtml(post.excerpt)}</p>
+                    <div class="blog-card-footer">
+                        <span class="blog-read-more">Ler mais →</span>
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            <span class="blog-read-time">${escHtml(post.readTime)}</span>
+                            <button class="blog-card-delete" data-delete="${post.id}" title="Excluir">✕</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Click to read
+            grid.querySelectorAll('.blog-card').forEach(card => {
+                card.addEventListener('click', e => {
+                    if (e.target.matches('[data-delete]')) return;
+                    showPost(card.dataset.id);
+                });
+            });
+
+            // Delete buttons
+            grid.querySelectorAll('[data-delete]').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    deletePost(btn.dataset.delete);
+                });
+            });
+
+            // Trigger reveal animations
+            setTimeout(() => {
+                grid.querySelectorAll('.reveal-item').forEach(el => el.classList.add('visible'));
+            }, 80);
+        }
+
+        /* ---- Show single post ---- */
+        function showPost(id) {
+            const posts = getBlogPosts();
+            const post  = posts.find(p => String(p.id) === String(id));
+            if (!post) return;
+
+            document.getElementById('postDetailTag').innerHTML =
+                `<span class="blog-tag">${escHtml(post.tag)}</span>`;
+            document.getElementById('postDetailTitle').textContent = post.title;
+            document.getElementById('postDetailMeta').innerHTML   =
+                `<span>${escHtml(post.date)}</span><span>${escHtml(post.readTime)}</span>`;
+
+            // Render body — convert newlines to paragraphs
+            const bodyHtml = post.body
+                .split(/\n\n+/)
+                .map(para => `<p>${escHtml(para).replace(/\n/g, '<br>')}</p>`)
+                .join('');
+            document.getElementById('postDetailBody').innerHTML = bodyHtml;
+
+            document.getElementById('blogListView').classList.add('hidden');
+            document.getElementById('postView').classList.add('visible');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        /* ---- Back to list ---- */
+        document.getElementById('backToList')?.addEventListener('click', e => {
+            e.preventDefault();
+            document.getElementById('blogListView').classList.remove('hidden');
+            document.getElementById('postView').classList.remove('visible');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        /* ---- Delete post ---- */
+        function deletePost(id) {
+            if (!confirm('Excluir este post?')) return;
+            const posts = getBlogPosts().filter(p => String(p.id) !== String(id));
+            saveBlogPosts(posts);
+            renderBlogPosts();
+        }
+
+        /* ---- Modal open/close ---- */
+        const modal = document.getElementById('blogFormModal');
+
+        document.getElementById('openNewPost')?.addEventListener('click', () => {
+            modal?.classList.add('open');
+        });
+
+        document.getElementById('modalClose')?.addEventListener('click', () => {
+            modal?.classList.remove('open');
+        });
+
+        modal?.addEventListener('click', e => {
+            if (e.target === modal) modal.classList.remove('open');
+        });
+
+        /* ---- New post form ---- */
+        document.getElementById('newPostForm')?.addEventListener('submit', e => {
+            e.preventDefault();
+            const title   = document.getElementById('postTitle').value.trim();
+            const tag     = document.getElementById('postTag').value;
+            const excerpt = document.getElementById('postExcerpt').value.trim();
+            const body    = document.getElementById('postBody').value.trim();
+
+            if (!title || !body) return;
+
+            const posts  = getBlogPosts();
+            const newPost = {
+                id:       Date.now(),
+                title,
+                tag,
+                excerpt:  excerpt || body.substring(0, 150) + (body.length > 150 ? '...' : ''),
+                body,
+                date:     new Date().toLocaleDateString('pt-BR', { year: 'numeric', month: 'long', day: 'numeric' }),
+                readTime: Math.max(1, Math.ceil(body.split(' ').length / 200)) + ' min de leitura'
+            };
+
+            posts.unshift(newPost);
+            saveBlogPosts(posts);
+            renderBlogPosts();
+
+            e.target.reset();
+            modal?.classList.remove('open');
+
+            // Flash success
+            const btn = document.getElementById('openNewPost');
+            if (btn) {
+                const orig = btn.innerHTML;
+                btn.textContent = '✓ Publicado!';
+                setTimeout(() => { btn.innerHTML = orig; }, 2000);
+            }
+        });
+
+        /* ---- Utils ---- */
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /* ---- Init ---- */
+        renderBlogPosts();
+    </script>
+</body>
+</html>
